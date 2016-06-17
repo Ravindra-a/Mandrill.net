@@ -21,10 +21,22 @@ namespace Tests
             return apiKey;
         });
 
+
+        private static Uri GetCustomUri()
+        {
+            var uri = Environment.GetEnvironmentVariable("MANDRILL_API_BASE_URL");
+            if (!string.IsNullOrEmpty(uri))
+            {
+                return new Uri(uri);
+            }
+            return null;
+        }
+
         protected string ApiKey
         {
             get { return ApiKeyLazy.Value; }
         }
+       
         private Lazy<MandrillApi> LazyApi;
 
         protected MandrillApi Api { get { return LazyApi.Value; } }
@@ -32,7 +44,15 @@ namespace Tests
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
-            LazyApi = new Lazy<MandrillApi>(() => new MandrillApi(ApiKey));
+            var customUri = GetCustomUri();
+            if(customUri != null)
+            {
+                 LazyApi = new Lazy<MandrillApi>(() => new MandrillApi(ApiKey, customUri));
+            }
+            else
+            {
+                LazyApi = new Lazy<MandrillApi>(() => new MandrillApi(ApiKey));
+            }
         }
 
         [OneTimeTearDown]

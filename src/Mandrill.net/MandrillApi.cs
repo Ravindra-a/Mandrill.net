@@ -6,6 +6,8 @@ namespace Mandrill
 {
     public class MandrillApi
     {
+        private static readonly Uri DefaultBaseUrl = new Uri("https://mandrillapp.com/api/1.0/");
+
         private readonly MandrillRequest _request;
 
         private MandrillExportsApi _exports;
@@ -20,14 +22,18 @@ namespace Mandrill
         private MandrillWebHooksApi _webhooks;
         private MandrillWhitelistsApi _whitelists;
 
-        public MandrillApi(string apiKey)
+        public MandrillApi(string apiKey) : this(apiKey, DefaultBaseUrl)
         {
-            if (apiKey == null) throw new ArgumentNullException(nameof(apiKey));
-            _request = new SystemWebMandrillRequest(apiKey);
-            ApiKey = apiKey;
         }
 
-        public string ApiKey { get; private set; }
+        public MandrillApi(string apiKey, Uri baseUrl)
+        {
+            _request = new SystemWebMandrillRequest(apiKey, baseUrl);
+        }
+
+        public string ApiKey => _request.ApiKey;
+        public Uri BaseUrl => _request.BaseUrl;
+
         public IMandrillMessagesApi Messages => _messages ?? (_messages = new MandrillMessagesApi(this));
 
         public IMandrillTagsApi Tags => _tags ?? (_tags = new MandrillTagsApi(this));

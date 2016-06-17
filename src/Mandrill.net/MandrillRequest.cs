@@ -11,14 +11,17 @@ namespace Mandrill
 {
     internal abstract class MandrillRequest
     {
-        protected static readonly Uri BaseUrl = new Uri("https://mandrillapp.com/api/1.0/");
-
-        protected MandrillRequest(string apiKey)
+        protected MandrillRequest(string apiKey, Uri baseUrl)
         {
+            if (apiKey == null) throw new ArgumentNullException(nameof(apiKey));
+            if (baseUrl == null) throw new ArgumentNullException(nameof(baseUrl));
+            if (!baseUrl.AbsoluteUri.EndsWith("/")) throw new ArgumentException(nameof(baseUrl), "The base url must end with a slash. Example: https://mandrillapp.com/api/1.0/");
             ApiKey = apiKey;
+            BaseUrl = baseUrl;
         }
 
-        protected string ApiKey { get; set; }
+        public string ApiKey { get; set; }
+        public Uri BaseUrl { get; set; }
 
 #if NET45
         public abstract TResponse Post<TRequest, TResponse>(string requestUri, TRequest value)
@@ -35,7 +38,8 @@ namespace Mandrill
         private static readonly string UserAgent =
             $"Mandrill.net/{typeof (MandrillApi).GetTypeInfo().Assembly.GetName().Version.ToString(3)}";
 
-        public SystemWebMandrillRequest(string apiKey) : base(apiKey)
+        public SystemWebMandrillRequest(string apiKey, Uri baseUrl) : 
+            base(apiKey, baseUrl)
         {
         }
 #if NET45
